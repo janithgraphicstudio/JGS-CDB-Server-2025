@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JGS Lanka File Access</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="data.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>JGS CDB Server 2025</h1>
+        
+        <div class="input-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" placeholder="Enter your Username">
+        </div>
+        
+        <button id="searchBtn" class="btn">Search</button>
+        
+        <div id="searchingText" class="searching-text">Searching...</div>
+        
+        <div id="progressContainer" class="progress-container">
+            <div id="progressBar" class="progress-bar"></div>
+        </div>
+        
+        <div id="userDisplay" class="user-display">
+            <p>Hi.👋 Welcome back, <strong id="displayName"></strong></p>
+            <div class="input-group">
+                <label for="password">Enter Your Password</label>
+                <input type="password" id="password" placeholder="Enter your password">
+            </div>
+            <button id="verifyBtn" class="btn">Verify Password</button>
+        </div>
+        
+        <div id="errorMessage" class="message error"></div>
+        <div id="successMessage" class="message success"></div>
+        <div id="infoMessage" class="message info"></div>
+        
+        <div id="fileLink" class="file-link">
+            <a id="downloadLink" href="#" target="_blank" class="btn">Get Your File</a>
+        </div>
+        
+        <div class="footer">
+            <a href="https://wa.me/94702001859" target="_blank">Forgot My Account</a>
+            <div class="powered-by">Powerd By JGS Lanka Co.</div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
