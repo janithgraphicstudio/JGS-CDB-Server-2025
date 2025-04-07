@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JGS Lanka Admin Panel</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* පවතින ස්ටයිල් එකතු කරන්න */
+        .admin-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .user-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: var(--card-bg);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .user-table th {
+            background: var(--primary-color);
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        .user-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .admin-input {
+            width: 100%;
+            padding: 8px 12px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 5px;
+            color: white;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .action-btn {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .delete-btn {
+            background: var(--error-color);
+            color: white;
+        }
+        
+        .edit-btn {
+            background: var(--secondary-color);
+            color: white;
+        }
+        
+        .add-user-btn {
+            background: var(--success-color);
+            color: white;
+            margin: 10px 0;
+        }
+        
+        .save-btn {
+            background: var(--primary-color);
+            color: white;
+            margin-top: 20px;
+            padding: 10px 20px;
+        }
+        
+        .search-container {
+            margin: 15px 0;
+        }
+        
+        #searchInput {
+            width: 300px;
+            max-width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container admin-container">
+        <h1>JGS Admin Dashboard</h1>
+        
+        <div id="authSection">
+            <div class="input-group">
+                <label for="adminPass">Admin Password</label>
+                <input type="password" id="adminPass" placeholder="Enter admin password" class="admin-input">
+            </div>
+            <button id="loginBtn" class="btn">Login</button>
+        </div>
+        
+        <div id="adminContent" style="display:none;">
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="Search accounts..." class="admin-input">
+                <button id="searchBtn" class="btn">Search</button>
+            </div>
+            
+            <button id="loadDataBtn" class="btn add-user-btn">Load Data File</button>
+            <button id="addUserBtn" class="btn add-user-btn">+ Add New Account</button>
+            
+            <div class="table-responsive">
+                <table class="user-table">
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Password</th>
+                            <th>File Link</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userTableBody">
+                        <!-- පරිශීලක දත්ත ස්වයංක්‍රීයව පිරවෙයි -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <button id="saveBtn" class="btn save-btn">Save All Changes</button>
+            <div id="adminMessage" class="message"></div>
+        </div>
+    </div>
+
+    <script>
+        // Admin Configuration
+        const ADMIN_PASSWORD = "Janitha@22"; // ඔබේ ආරක්ෂිත පැස්වර්ඩ් එක මෙතැන යොදන්න
+        let fileHandle = null;
+        let currentUsers = [];
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            // DOM Elements
+            const adminPassInput = document.getElementById('adminPass');
+            const loginBtn = document.getElementById('loginBtn');
+            const authSection = document.getElementById('authSection');
+            const adminContent = document.getElementById('adminContent');
+            const loadDataBtn = document.getElementById('loadDataBtn');
+            const addUserBtn = document.getElementById('addUserBtn');
+            const saveBtn = document.getElementById('saveBtn');
+            const searchInput = document.getElementById('searchInput');
+            const searchBtn = document.getElementById('searchBtn');
+            const userTableBody = document.getElementById('userTableBody');
+            const messageDiv = document.getElementById('adminMessage');
+            
+            // Login Functionality
+            loginBtn.addEventListener('click', () => {
+                if(adminPassInput.value === ADMIN_PASSWORD) {
+                    localStorage.setItem('adminAuth', 'true');
+                    authSection.style.display = 'none';
+                    adminContent.style.display = 'block';
+                    showMessage('Admin access granted', 'success');
+                } else {
+                    showMessage('Incorrect admin password!', 'error');
+                }
+            });
+            
+            // Check existing auth
+            if(localStorage.getItem('adminAuth')) {
+                authSection.style.display = 'none';
+                adminContent.style.display = 'block';
+            }
+            
+            // Load Data Button
+            loadDataBtn.addEventListener('click', async () => {
+                try {
+                    currentUsers = await loadUserData();
+                    renderUserTable(currentUsers);
+                    showMessage('Data loaded successfully!', 'success');
+                } catch (error) {
+                    console.error("Error loading data:", error);
+                    showMessage('Error loading data: ' + error.message, 'error');
+                }
+            });
+            
+            // Search Functionality
+            searchBtn.addEventListener('click', () => {
+                const searchTerm = searchInput.value.toLowerCase();
+                if(searchTerm) {
+                    const filteredUsers = currentUsers.filter(user => 
+                        user.Name.toLowerCase().includes(searchTerm) || 
+                        user.fileLink.toLowerCase().includes(searchTerm)
+                    );
+                    renderUserTable(filteredUsers);
+                } else {
+                    renderUserTable(currentUsers);
+                }
+            });
+            
+            // Add New User
+            addUserBtn.addEventListener('click', () => {
+                currentUsers.push({
+                    Name: '',
+                    Password: '',
+                    fileLink: ''
+                });
+                renderUserTable(currentUsers);
+            });
+            
+            // Save Data
+            saveBtn.addEventListener('click', async () => {
+                try {
+                    currentUsers = collectUserData();
+                    await saveUserData(currentUsers);
+                    showMessage('All changes saved successfully!', 'success');
+                } catch (error) {
+                    console.error("Error saving data:", error);
+                    showMessage('Error saving data: ' + error.message, 'error');
+                }
+            });
+            
+            /* Helper Functions */
+            
+            // Load user data from file
+            async function loadUserData() {
+                try {
+                    [fileHandle] = await window.showOpenFilePicker({
+                        types: [{
+                            description: 'User Data File',
+                            accept: {'application/javascript': ['.js']}
+                        }],
+                        multiple: false
+                    });
+                    
+                    const file = await fileHandle.getFile();
+                    const content = await file.text();
+                    
+                    // Extract user data safely
+                    const userDataMatch = content.match(/const userDatabase = (\[.*?\]);/s);
+                    if (userDataMatch) {
+                        return JSON.parse(userDataMatch[1]);
+                    }
+                    throw new Error("Invalid data format in file");
+                } catch (error) {
+                    console.error("File access error:", error);
+                    throw error;
+                }
+            }
+            
+            // Render user table
+            function renderUserTable(users) {
+                userTableBody.innerHTML = '';
+                
+                users.forEach((user, index) => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td><input type="text" class="admin-input" value="${user.Name || ''}" data-field="Name" data-index="${index}"></td>
+                        <td><input type="password" class="admin-input" value="${user.Password ? atob(user.Password) : ''}" data-field="Password" data-index="${index}"></td>
+                        <td><input type="url" class="admin-input" value="${user.fileLink || ''}" data-field="fileLink" data-index="${index}"></td>
+                        <td class="action-buttons">
+                            <button class="action-btn delete-btn" data-index="${index}">Delete</button>
+                        </td>
+                    `;
+                    userTableBody.appendChild(tr);
+                });
+                
+                // Add event listeners for delete buttons
+                document.querySelectorAll('.delete-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const index = this.getAttribute('data-index');
+                        currentUsers.splice(index, 1);
+                        renderUserTable(currentUsers);
+                        showMessage('User removed. Remember to save changes!', 'info');
+                    });
+                });
+            }
+            
+            // Collect data from table
+            function collectUserData() {
+                const rows = userTableBody.querySelectorAll('tr');
+                const users = [];
+                
+                rows.forEach(row => {
+                    users.push({
+                        Name: row.querySelector('[data-field="Name"]').value.trim(),
+                        Password: btoa(row.querySelector('[data-field="Password"]').value.trim()),
+                        fileLink: row.querySelector('[data-field="fileLink"]').value.trim()
+                    });
+                });
+                
+                return users;
+            }
+            
+            // Save data to file
+            async function saveUserData(users) {
+                try {
+                    if (!fileHandle) {
+                        fileHandle = await window.showSaveFilePicker({
+                            suggestedName: 'data.js',
+                            types: [{
+                                description: 'JavaScript Files',
+                                accept: {'application/javascript': ['.js']}
+                            }]
+                        });
+                    }
+                    
+                    const writable = await fileHandle.createWritable();
+                    await writable.write(`const userDatabase = ${JSON.stringify(users, null, 4)};`);
+                    await writable.close();
+                    
+                    return true;
+                } catch (error) {
+                    console.error("File save error:", error);
+                    throw error;
+                }
+            }
+            
+            // Show message
+            function showMessage(message, type) {
+                messageDiv.textContent = message;
+                messageDiv.className = `message ${type}`;
+                messageDiv.style.display = 'block';
+                
+                setTimeout(() => {
+                    messageDiv.style.display = 'none';
+                }, 3000);
+            }
+        });
+    </script>
+</body>
+</html>

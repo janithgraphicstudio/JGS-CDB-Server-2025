@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
+	
     const searchBtn = document.getElementById('searchBtn');
     const verifyBtn = document.getElementById('verifyBtn');
     const usernameInput = document.getElementById('username');
@@ -13,8 +14,24 @@ document.addEventListener('DOMContentLoaded', function() {
     const infoMessage = document.getElementById('infoMessage');
     const fileLink = document.getElementById('fileLink');
     const downloadLink = document.getElementById('downloadLink');
-    
+    // Admin ලින්ක් එක පෙන්වන්න
+const adminLink = document.getElementById('adminLink');
+adminLink.style.display = 'inline-block';
     let currentUser = null;
+	
+
+// Admin ලින්ක් එකට ඇඩ්මින් පැස්වර්ඩ් එක අවශ්ය කරන්න
+
+        adminLink.addEventListener('click', (e) => {
+	 e.preventDefault();
+    const password = prompt('Enter Admin Password:');
+    if (password === 'Janitha@22') {// ඔබේ ඇඩ්මින් පැස්වර්ඩ් එක මෙතන යොදන්න
+	   window.location.href = 'admin.html';
+       
+     } else {
+        alert('Incorrect admin password! Access denied.');
+    }
+});
     
     // Search Button Event
     searchBtn.addEventListener('click', handleSearch);
