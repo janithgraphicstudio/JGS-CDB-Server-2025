@@ -11,8 +11,8 @@ const userDatabase = [
         "fileLink": "https://drive.google.com/drive/folders/1aAEXEmt1J0tSKrTCt0k2rMLMRbdNvZwK?usp=sharing"
     },
     {
-        "Name": "ජී.ජී.එස්",
-        "Password": "1234",
+        "Name": "Pradeep",
+        "Password": "10373",
         "fileLink": "https://jgs.lk/files/project.pdf"
     },
     {
