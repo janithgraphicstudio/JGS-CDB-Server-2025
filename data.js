@@ -19,10 +19,10 @@ const userDatabase = [
         "Name": "Danushka",
         "Password": "4846",
         "fileLink": "https://drive.google.com/drive/folders/10O5_pIGP2dZGQ35oY-HPotMMh1XNdFWs?usp=sharing"
-    }
+    },
      {
         "Name": "Designhub",
         "Password": "3819",
         "fileLink": "https://drive.google.com/drive/folders/1UPGiD8aIkqFL_XWBYAuw2dr_GrPEOjv5?usp=sharing"
-    }
+    },
 ];
